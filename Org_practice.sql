@@ -1,0 +1,208 @@
+CREATE DATABASE IF NOT EXISTS ORG;
+SHOW DATABASES;
+USE ORG;
+
+-- //creating table-- 
+
+CREATE TABLE Worker (
+	WORKER_ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    FIRST_NAME CHAR(25),
+    LAST_NAME CHAR(25),
+    SALARY INT(15),
+    JOINING_DATE DATETIME,
+    DEPARTMENT CHAR(25)
+);
+
+-- insrting the element into table--  
+
+INSERT INTO Worker (WORKER_ID, FIRST_NAME, LAST_NAME, SALARY, JOINING_DATE, DEPARTMENT) VALUES
+	(001, 'Monica', 'Arora', 100000, '14-02-20 09.00.00', 'HR'),
+    (002, 'Niharika', 'Verma', 80000, '14-06-11 09.00.00', 'Admin'),
+    (003, 'Vishal', 'Singh', 300000, '14-02-20 09.00.00', 'HR'),
+    (004, 'Amitabh', 'Singhg', 500000, '14-02-20 09.00.00', 'Admin'),
+    (005, 'Vivek', 'Bharti', 500000, '14-06-11 09.00.00', 'Admin'),
+    (006, 'Viput', 'Diwan', 200000, '14-04-11 09.00.00', 'Account'),
+    (007, 'Satish', 'Kumar', 75000, '14-04-11 09.00.00', 'Account'),
+	(008, 'Geetika', 'Chauhan', 90000, '14-04-11 09.00.00', 'Admin');
+ 
+ SELECT * FROM Worker;
+ 
+CREATE TABLE Bonus (
+	WORKER_REF_ID INT,
+    BONUS_AMOUNT INT(10),
+    BONUS_DATE DATETIME,
+    FOREIGN KEY (WORKER_REF_ID)
+		REFERENCES Worker(WORKER_ID)
+        ON DELETE CASCADE
+);
+
+INSERT INTO Bonus (WORKER_REF_ID, BONUS_AMOUNT, BONUS_DATE) VALUES
+	(001, 5000, '16-02-20'),
+    (002, 3000, '16-06-11'),
+    (003, 4000, '16-06-20'),
+    (001, 4500, '16-02-20'),
+    (002, 3500, '16-06-11');
+
+SELECT * FROM Bonus;
+
+CREATE TABLE Title (
+	WORKER_REF_ID INT,
+    WORKER_TITLE CHAR(25),
+    AFFECTED_FROM DATETIME,
+    FOREIGN KEY (WORKER_REF_ID)
+		REFERENCES Worker(WORKER_ID)
+        ON  DELETE CASCADE
+);
+
+INSERT INTO Title (WORKER_REF_ID, WORKER_TITLE, AFFECTED_FROM) VALUES
+	(001, 'Manager', '2016-02-20 00.00.00'),
+    (002, 'Executive', '2016-06-11 00.00.00'),
+    (008, 'Executive', '2016-06-11 00.00.00'),
+    (005, 'Manager', '2016-06-11 00.00.00'),
+    (004, 'Asst. Manager', '2016-06-11 00.00.00'),
+    (007, 'Executive', '2016-06-11 00.00.00'),
+    (006, 'Lead', '2016-06-11 00.00.00'),
+    (003, 'Lead', '2016-06-11 00.00.00');
+    
+SELECT * FROM Title;
+
+-- selecting specific selement from any table-- 
+
+SELECT SALARY FROM Worker;
+SELECT FIRST_NAME, SALARY FROM Worker;
+
+-- return time of the server-- 
+SELECT now();
+
+-- select can be used without from using dual table-- 
+SELECT 44+11;
+
+-- Where -- 
+
+SELECT * FROM Worker WHERE SALARY > 100000;
+SELECT * FROM Worker WHERE DEPARTMENT = 'HR';
+
+--  between , salary (80000,300000)-- 
+SELECT * FROM Worker WHERE SALARY BETWEEN 80000 AND 300000;
+
+--  reduce OR statement-- 
+
+ -- HR, Admin
+ SELECT * FROM Worker WHERE DEPARTMENT = 'HR' OR DEPARTMENT = 'Admin';
+ 
+ -- better way 
+ SELECT * FROM Worker WHERE DEPARTMENT IN ('HR', 'Admin');
+ 
+  SELECT * FROM Worker WHERE DEPARTMENT NOT IN ('HR', 'Admin');
+
+-- wildcard  (% = any no. of char using 0,  _ = only one char)--  
+SELECT * FROM Worker WHERE FIRST_NAME LIKE '%i%';
+SELECT * FROM Worker WHERE FIRST_NAME LIKE '_i%';
+
+-- sorting using order by-- 
+SELECT * FROM Worker ORDER BY SALARY;
+SELECT * FROM Worker ORDER BY SALARY DESC;
+
+-- distinct-- 
+SELECT DEPARTMENT FROM Worker;
+SELECT DISTINCT DEPARTMENT FROM Worker;
+
+-- Data grouping (find the no. of workers in each department)-- 
+-- GROUP BY ----> aggregation-- 
+SELECT DEPARTMENT FROM Worker GROUP BY DEPARTMENT;  -- sql  treat this statement as distinct-- 
+SELECT DEPARTMENT, COUNT(DEPARTMENT) FROM Worker GROUP BY DEPARTMENT;
+
+-- AVG. salary per departmentt-- 
+SELECT DEPARTMENT, AVG(SALARY) FROM Worker GROUP BY DEPARTMENT;
+
+ -- MIN
+ SELECT DEPARTMENT, MIN(SALARY) FROM Worker GROUP BY DEPARTMENT;
+ 
+ -- MAX
+ SELECT DEPARTMENT, MAX(SALARY) FROM Worker GROUP BY DEPARTMENT;
+ 
+ -- SUM
+ SELECT DEPARTMENT, SUM(SALARY) FROM Worker GROUP BY DEPARTMENT;
+ 
+ -- Group by HAVING 
+ SELECT DEPARTMENT, COUNT(DEPARTMENT) FROM Worker GROUP BY DEPARTMENT HAVING COUNT(DEPARTMENT) > 2;
+ 
+ -- ADD new colum
+ ALTER TABLE Worker ADD TENURE INT NOT NULL DEFAULT 0;
+ 
+ -- Modify data type
+  ALTER TABLE Worker MODIFY TENURE FLOAT NOT NULL DEFAULT 0;
+
+-- check data type describe
+DESC Worker;
+
+--  change column- rename
+ ALTER TABLE Worker CHANGE COLUMN TENURE WORKING_SINCE INT NOT NULL DEFAULT 0;
+ 
+ -- Drop column
+  ALTER TABLE Worker DROP COLUMN WORKING_SINCE;
+  
+  --  Remane table
+   ALTER TABLE Worker RENAME TO Worker_details;
+   -- changing back
+
+-- JOINING MEHODS
+-- INNER JOIN
+SELECT w.WORKER_ID, t.WORKER_REF_ID FROM Worker AS w 
+INNER JOIN Title AS t ON w.WORKER_ID = t.WORKER_REF_ID;
+
+SELECT w.WORKER_ID, w.FIRST_NAME, t.WORKER_TITLE, t.WORKER_REF_ID FROM Worker AS w 
+INNER JOIN Title AS t ON w.WORKER_ID = t.WORKER_REF_ID;
+
+SELECT w.WORKER_ID, w.FIRST_NAME, w.LAST_NAME, w.SALARY, t.WORKER_TITLE, t.WORKER_REF_ID FROM Worker AS w 
+INNER JOIN Title AS t ON w.WORKER_ID = t.WORKER_REF_ID;
+
+SELECT * FROM Worker AS w 
+INNER JOIN Title AS t ON w.WORKER_ID = t.WORKER_REF_ID;
+
+-- FIND WORKER ID WHO WORK IN ADMIN AND SALARY ABOVE 85000 TITLE IS Executive
+SELECT w.WORKER_ID, w.DEPARTMENT, w.SALARY, t.WORKER_TITLE, t.WORKER_REF_ID FROM Worker AS w
+INNER JOIN Title AS t ON w.WORKER_ID = t.WORKER_REF_ID;
+
+SELECT w.WORKER_ID, w.DEPARTMENT, w.SALARY, t.WORKER_TITLE, t.WORKER_REF_ID FROM Worker AS w
+INNER JOIN Title AS t ON w.WORKER_ID = t.WORKER_REF_ID 
+WHERE w.DEPARTMENT = 'Admin' AND t.WORKER_TITLE = 'Executive';
+
+SELECT w.WORKER_ID, w.DEPARTMENT, w.SALARY, t.WORKER_TITLE, t.WORKER_REF_ID FROM Worker AS w
+INNER JOIN Title AS t ON w.WORKER_ID = t.WORKER_REF_ID 
+WHERE w.DEPARTMENT = 'Admin' AND t.WORKER_TITLE = 'Executive' AND SALARY > 85000;
+
+-- LEFT JOIN
+SELECT * FROM Worker AS w LEFT JOIN
+Bonus AS b ON w.WORKER_ID = b.WORKER_REF_ID;
+
+-- RIGHT JOIN
+SELECT * FROM Worker AS w RIGHT JOIN
+Bonus AS b ON w.WORKER_ID = b.WORKER_REF_ID;
+
+-- CROSS JOIN
+SELECT w.FIRST_NAME, w.WORKER_ID,t.WORKER_TITLE, t.WORKER_REF_ID FROM Worker AS w
+CROSS JOIN Title AS t;
+
+-- INNER JOIN without INNER JOIN keyword 
+SELECT w.WORKER_ID, w.FIRST_NAME, t.WORKER_TITLE, t.WORKER_REF_ID FROM Worker AS w,
+ Title AS t WHERE w.WORKER_ID = t.WORKER_REF_ID;
+ 
+ -- UNION
+ SELECT * FROM Worker
+ UNION
+ SELECT * FROM Worker2;
+ 
+ -- if specific data is asked 
+  SELECT * FROM Worker WHERE SALAR = 500
+ UNION
+ SELECT * FROM Worker2 WHERE SALAR = 500;
+ 
+ -- INTERSECTION
+ SELECT * FROM Worker INNER JOIN Worker2 USING(WORKER_ID);
+ 
+  SELECT Worker.* FROM Worker INNER JOIN Worker2 USING(WORKER_ID);
+
+--  MINUS OPERATION
+SELECT Worker.* FROM Worker INNER JOIN Worker2 USING(WORKER_ID) WHERE Worker2.WORKER_ID IS NULL;
+
